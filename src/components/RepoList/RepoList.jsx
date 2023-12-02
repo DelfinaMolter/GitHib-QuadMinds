@@ -1,39 +1,56 @@
-import { useEffect } from "react";
-import { useGetRepoList } from "../../services/getRepos";
+import { useEffect, useState } from "react";
+import GetRepoList from "../../services/getRepos";
+import SearchRepos from "../../services/searchRepos";
 import RepoCard from "../RepoCard/RepoCard";
 import { useAppContext } from "../../context/context";
 import ListStarred from "../../services/listStarred";
 
 
 function RepoBoxList() {
-  const { context, setContext } = useAppContext();
-  const { repos, isError, isLoading } = useGetRepoList();
+  const { context} = useAppContext();
+  const [ repos, setRepos] = useState([])
+  const [ dataStar, setDataStar ] = useState([])
+  const [loading, setLoading] = useState(true);
 
-  const getInfoStar = async() =>{
-    const infoStar = await ListStarred()
-    console.log(infoStar);
+
+  const getDataStar = async() =>{
+    const response = await ListStarred();
+    if(response.status === 200){
+      const fullNamesStarred = response.data.map(obj => obj.full_name);
+      setDataStar(fullNamesStarred)
+    } 
+  }
+
+  const getRepos = async() =>{
+    setLoading(true);
+    if( context.hasOwnProperty("query") & context.query !== ""){
+      const response = await SearchRepos(context.query );
+      response.status === 200 && setRepos( response.data.items)
+      getDataStar()
+      setLoading(false);
+    }else{
+      const infoRepo = await GetRepoList()
+      infoRepo.status === 200 && setRepos(infoRepo.data)
+      getDataStar()
+      setLoading(false);
+    }
   }
 
 
   useEffect(()=>{
-    if( !context.hasOwnProperty("query") | context.query === ""){
-      setContext( {...context, repos: repos})
-    }
-    getInfoStar();
-  },[repos])
+    getRepos()
+  },[ context.query])
 
+  if(loading) return <h1> Loading... </h1>
 
-  if (isError ) return ( <h2>No se encontraron repositorios, intentelo más tarde.</h2>)
   return (
     <div className="w-full">
-      {
-        isLoading && <h1> Loading...</h1>
-      }
 
       {
-        context.repos && 
-        
-        context.repos.map((repo, index)=> <RepoCard key={index} data={repo}/>)
+        !loading & repos.length < 0 ?
+        <h1>No se encontraron repositorios.</h1>
+        :
+        repos.map((repo, index)=> <RepoCard key={index} data={repo} starred={dataStar.some(fullName => fullName === repo.full_name)}/>)
       }
     </div>
 

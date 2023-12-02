@@ -1,38 +1,43 @@
-import useSWR from "swr";
 
-const fetcher = (url) => //{
-  // Simulando un retraso inicial de 2 segundos antes de hacer la llamada para visualizar el Loading.
-  // return new Promise((resolve, reject) => {
-  //   setTimeout(() => {
-      fetch(url,{
-          method:"GET",
-          headers:{
-            Accept: "application/vnd.github+json",
-            Authorization: "Bearer " + process.env.REACT_APP_GITHUB_TOKEN,
-            "X-GitHub-Api-Version": "2022-11-28",
-          }
-        })
-      .then(res=> res.json())
-//       .then((data) => {
-//         setTimeout(() => {
-//           resolve(data);
-//         }, 2000);
-//       })
-//       .catch((error) => {
-//         reject(error);
-//       });
-//   }, 2000);
-// });
+import axios from 'axios';
+
+// const GetRepoList = async () => {
+//   return new Promise((resolve) => {
+//     axios({
+//       method: "GET",
+//       url: `${process.env.REACT_APP_GITHUB_API_URL}/user/repos`,
+//       headers: {
+//         Accept: "application/vnd.github+json",
+//           Authorization: "Bearer " + process.env.REACT_APP_GITHUB_TOKEN,
+//           "X-GitHub-Api-Version": "2022-11-28",
+//       }
+//     })
+//       .then((response) => resolve(response))
+//       .catch((error) => resolve(error));
+//   });
+
 // };
-export const useGetRepoList = () => {
-  const { data, error, isLoading } = useSWR(
-    `${process.env.REACT_APP_GITHUB_API_URL}/user/repos`,
-    (url)=>fetcher(url)
-  );
+// export default GetRepoList;
 
-  return {
-    repos: data,
-    isLoading,
-    isError: error
-  };
+
+// Simular un retraso de 2 segundos para visualizar el loading.
+
+const GetRepoList = async () => {
+  return new Promise((resolve) => {
+    setTimeout(() => { 
+      axios({
+        method: "GET",
+        url: `${process.env.REACT_APP_GITHUB_API_URL}/user/repos`,
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: "Bearer " + process.env.REACT_APP_GITHUB_TOKEN,
+          "X-GitHub-Api-Version": "2022-11-28",
+        }
+      })
+      .then((response) => resolve(response))
+      .catch((error) => resolve(error));
+    }, 2000); 
+  });
 };
+
+export default GetRepoList;

@@ -3,12 +3,12 @@ import DeleteStarred from "../../services/deleteStarred";
 import Starred from "../../services/putStarred";
 import Button from "../Button/Button";
 import Star from "../Star/Star";
-function RepoCard({data}) {
+function RepoCard({data, starred}) {
   const [ star, setStar ] = useState(false)
 
   useEffect(()=>{
-    setStar(data.stargazers_count)
-  },[data])
+    setStar(starred)
+  },[data, starred])
 
 
   const handleStar = async() => {
@@ -16,11 +16,12 @@ function RepoCard({data}) {
       const response = await Starred(data.full_name );
       response.status === 204 && setStar(!star)
     }
-    if(star === 1){
+    if(star == 1){
       const response = await DeleteStarred(data.full_name);
       response.status === 204 && setStar(!star)
     }
   }
+
   return (
     <div className="w-full flex flex-row justify-between items-center ">
       <h1>{data.name}</h1>
