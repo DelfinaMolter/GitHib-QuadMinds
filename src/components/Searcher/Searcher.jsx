@@ -2,11 +2,11 @@ import React from "react";
 import { useAppContext } from "../../context/context";
 
 function Searcher() {
-  const {  setContext } = useAppContext();
+  const { context, setContext } = useAppContext();
 
   const handleSearch = (e) =>{
     const getData = setTimeout(() => {
-      setContext({query: e.target.value})
+      setContext({...context, query: e.target.value, page: 1})
     }, 2000)
     return () => clearTimeout(getData)
   }

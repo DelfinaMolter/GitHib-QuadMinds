@@ -4,6 +4,7 @@ import Starred from "../../services/putStarred";
 import Button from "../Button/Button";
 import Star from "../Star/Star";
 import Swal from 'sweetalert2'
+import DetailRepo from "../DetailRepo/DetailRepo";
 
 function RepoCard({data, starred}) {
   const [ star, setStar ] = useState(false)
@@ -35,7 +36,7 @@ function RepoCard({data, starred}) {
 
   return (
     <div className="w-full flex flex-row justify-between items-center ">
-      <h1>{data.name}</h1>
+      <DetailRepo data={data}/>
       <Button onClick={handleStar}>
         <Star isFull={star }/>
         <p className="p-2">{star? "Starred" :"Star"}</p>

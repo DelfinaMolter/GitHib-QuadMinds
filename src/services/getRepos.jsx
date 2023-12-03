@@ -22,12 +22,12 @@ import axios from 'axios';
 
 // Simular un retraso de 2 segundos para visualizar el loading.
 
-const GetRepoList = async () => {
+const GetRepoList = async (page) => {
   return new Promise((resolve) => {
     setTimeout(() => { 
       axios({
         method: "GET",
-        url: `${process.env.REACT_APP_GITHUB_API_URL}/user/repos`,
+        url: `${process.env.REACT_APP_GITHUB_API_URL}/user/repos?page=${page}`,
         headers: {
           Accept: "application/vnd.github+json",
           Authorization: "Bearer " + process.env.REACT_APP_GITHUB_TOKEN,

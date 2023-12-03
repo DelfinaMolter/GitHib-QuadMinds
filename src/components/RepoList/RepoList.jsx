@@ -4,10 +4,11 @@ import SearchRepos from "../../services/searchRepos";
 import RepoCard from "../RepoCard/RepoCard";
 import { useAppContext } from "../../context/context";
 import ListStarred from "../../services/listStarred";
+import Pagination from "../Pagination/Pagination";
 
 
 function RepoBoxList() {
-  const { context} = useAppContext();
+  const { context, setContext} = useAppContext();
   const [ repos, setRepos] = useState([])
   const [ dataStar, setDataStar ] = useState([])
   const [ loading, setLoading ] = useState(true);
@@ -22,17 +23,27 @@ function RepoBoxList() {
     } 
   }
 
+  const getTotalPages = (linkHeader)=>{
+    const regex = /(?:[?&]page=(\d+))[^>]*>; rel="last"/;
+    const match = linkHeader.match(regex);
+    return match ? parseInt(match[1], 10) : 1;
+  }
+
   const getRepos = async() =>{
     setLoading(true);
     let response ={}
+    let page = 1;
+    !context.hasOwnProperty("page") ? setContext({...context, page: page}) : (page =  context.page)
     if( context.hasOwnProperty("query") & context.query !== ""){
-      response = await SearchRepos(context.query );
+      response = await SearchRepos(context.query, page );
       response.status === 200 && setRepos( response.data.items)
     }else{
-      response = await GetRepoList()
+      response = await GetRepoList(page)
       response.status === 200 && setRepos(response.data)
     }
-
+    console.log(response.headers.link)
+    setContext({...context, totalPages: getTotalPages(response.headers.link)})
+    
     if(response.status === 200){
       getDataStar()
       setErrorRepo(false)
@@ -47,7 +58,7 @@ function RepoBoxList() {
 
   useEffect(()=>{
     getRepos()
-  },[ context.query])
+  },[ context.query, context.page])
 
   if(loading) return <h1> Loading... </h1>
 
@@ -58,10 +69,14 @@ function RepoBoxList() {
 
       {
         repos.length > 0 ?
-        repos.map((repo, index)=> <RepoCard key={index} data={repo} starred={dataStar.some(fullName => fullName === repo.full_name)}/>)
+        <>
+          {repos.map((repo, index)=> <RepoCard key={index} data={repo} starred={dataStar.some(fullName => fullName === repo.full_name)}/>)}
+          <Pagination/>
+        </>
         :
         <h1>No se encontraron repositorios.</h1>
       }
+
     </div>
 
   );
