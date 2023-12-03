@@ -3,6 +3,8 @@ import DeleteStarred from "../../services/deleteStarred";
 import Starred from "../../services/putStarred";
 import Button from "../Button/Button";
 import Star from "../Star/Star";
+import Swal from 'sweetalert2'
+
 function RepoCard({data, starred}) {
   const [ star, setStar ] = useState(false)
 
@@ -12,13 +14,22 @@ function RepoCard({data, starred}) {
 
 
   const handleStar = async() => {
+    let response = {}
     if(!star){
-      const response = await Starred(data.full_name );
-      response.status === 204 && setStar(!star)
+      response = await Starred(data.full_name );
+    }else{
+      response = await DeleteStarred(data.full_name);
     }
-    if(star == 1){
-      const response = await DeleteStarred(data.full_name);
-      response.status === 204 && setStar(!star)
+    if(response.status === 204){
+      setStar(!star)
+    }else{
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "No se pudo procesar tu cambio, intenta más tarde.",
+        showConfirmButton: false,
+        timer: 1500
+      });
     }
   }
 

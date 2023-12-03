@@ -10,7 +10,8 @@ function RepoBoxList() {
   const { context} = useAppContext();
   const [ repos, setRepos] = useState([])
   const [ dataStar, setDataStar ] = useState([])
-  const [loading, setLoading] = useState(true);
+  const [ loading, setLoading ] = useState(true);
+  const [ isErrorRepo, setErrorRepo ] = useState(false);
 
 
   const getDataStar = async() =>{
@@ -23,15 +24,22 @@ function RepoBoxList() {
 
   const getRepos = async() =>{
     setLoading(true);
+    let response ={}
     if( context.hasOwnProperty("query") & context.query !== ""){
-      const response = await SearchRepos(context.query );
+      response = await SearchRepos(context.query );
       response.status === 200 && setRepos( response.data.items)
-      getDataStar()
-      setLoading(false);
     }else{
-      const infoRepo = await GetRepoList()
-      infoRepo.status === 200 && setRepos(infoRepo.data)
+      response = await GetRepoList()
+      response.status === 200 && setRepos(response.data)
+    }
+
+    if(response.status === 200){
       getDataStar()
+      setErrorRepo(false)
+      setLoading(false);
+    } else{
+      console.log(response.message)
+      setErrorRepo(true)
       setLoading(false);
     }
   }
@@ -43,14 +51,16 @@ function RepoBoxList() {
 
   if(loading) return <h1> Loading... </h1>
 
+  if(isErrorRepo) return <h1> Error al obtener los datos, intentelo más tarde.</h1>
+
   return (
     <div className="w-full">
 
       {
-        !loading & repos.length < 0 ?
-        <h1>No se encontraron repositorios.</h1>
-        :
+        repos.length > 0 ?
         repos.map((repo, index)=> <RepoCard key={index} data={repo} starred={dataStar.some(fullName => fullName === repo.full_name)}/>)
+        :
+        <h1>No se encontraron repositorios.</h1>
       }
     </div>
 
