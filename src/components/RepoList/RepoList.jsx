@@ -26,7 +26,7 @@ function RepoBoxList() {
   const getTotalPages = (linkHeader)=>{
     const regex = /(?:[?&]page=(\d+))[^>]*>; rel="last"/;
     const match = linkHeader.match(regex);
-    return match ? parseInt(match[1], 10) : 1;
+    match && setContext({...context, totalPages: parseInt(match[1], 10)});
   }
 
   const getRepos = async() =>{
@@ -42,7 +42,7 @@ function RepoBoxList() {
       response.status === 200 && setRepos(response.data)
     }
     console.log(response.headers.link)
-    setContext({...context, totalPages: getTotalPages(response.headers.link)})
+    getTotalPages(response.headers.link)
     
     if(response.status === 200){
       getDataStar()
