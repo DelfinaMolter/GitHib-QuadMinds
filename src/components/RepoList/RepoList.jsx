@@ -12,15 +12,19 @@ function RepoBoxList() {
   const [ repos, setRepos] = useState([])
   const [ dataStar, setDataStar ] = useState([])
   const [ loading, setLoading ] = useState(true);
-  const [ isErrorRepo, setErrorRepo ] = useState(false);
+  const [ isErrorRepo, setIsErrorRepo ] = useState(false);
 
 
   const getDataStar = async() =>{
-    const response = await ListStarred();
-    if(response.status === 200){
-      const fullNamesStarred = response.data.map(obj => obj.full_name);
-      setDataStar(fullNamesStarred)
-    } 
+    try {
+      const response = await ListStarred();
+      if(response.status === 200){
+        const fullNamesStarred = response.data.map(obj => obj.full_name);
+        setDataStar(fullNamesStarred)
+      } 
+    } catch (error) {
+      console.error("Error fetching starred repos:", error);
+    }
   }
 
   const getTotalPages = (linkHeader)=>{
@@ -34,23 +38,25 @@ function RepoBoxList() {
     let response ={}
     let page = 1;
     !context.hasOwnProperty("page") ? setContext({...context, page: page}) : (page =  context.page)
-    if( context.hasOwnProperty("query") & context.query !== ""){
-      response = await SearchRepos(context.query, page );
-      response.status === 200 && setRepos( response.data.items)
-    }else{
-      response = await GetRepoList(page)
-      response.status === 200 && setRepos(response.data)
-    }
-    console.log(response.headers.link)
-    getTotalPages(response.headers.link)
-    
-    if(response.status === 200){
-      getDataStar()
-      setErrorRepo(false)
-      setLoading(false);
-    } else{
-      console.log(response.message)
-      setErrorRepo(true)
+    try {
+      if( context.hasOwnProperty("query") & context.query !== ""){
+        response = await SearchRepos(context.query, page );
+        response.status === 200 && setRepos( response.data.items)
+      }else{
+        response = await GetRepoList(page)
+        response.status === 200 && setRepos(response.data)
+      }
+      console.log(response.headers.link)
+      getTotalPages(response.headers.link)
+      
+      if(response.status === 200){
+        getDataStar()
+        setIsErrorRepo(false)
+      }
+    } catch (error) {
+      console.error("Error fetching repos:", error);
+      setIsErrorRepo(true);
+    } finally {
       setLoading(false);
     }
   }
@@ -62,7 +68,7 @@ function RepoBoxList() {
 
   if(loading) return <h1> Loading... </h1>
 
-  if(isErrorRepo) return <h1> Error al obtener los datos, intentelo más tarde.</h1>
+  if(isErrorRepo) return <h1> Error al obtener los datos, inténtelo más tarde.</h1>
 
   return (
     <div className="w-full">

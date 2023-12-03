@@ -5,22 +5,25 @@ import Button from "../Button/Button";
 
 function Pagination() {
   const { context, setContext} = useAppContext();
-  const prev = -1;
-  const next = 1; 
-  const habdlePage = (direction) =>{
-    if(((context.page >= 1 & context.page < context.totalPages) & direction === next) | (context.page > 1 & direction === prev) ){
-      setContext({...context, page: (context.page + direction)});
+  const { page, totalPages } = context;
+
+  const handlePageChange = (direction) =>{
+    const nextPage = page + direction;
+    const isFirstPage = nextPage === 1;
+    const isLastPage = nextPage === totalPages;
+    if((nextPage >= 1 && nextPage <= totalPages) && (!isFirstPage || !isLastPage)){
+      setContext({...context, page: nextPage});
     }
   }
-console.log(context.totalPages)
+console.log(totalPages)
   return (
     <div>
-      <Button onClick={()=>habdlePage(prev)} >
-        <Arrow active={context.page > 1}/>
+      <Button onClick={()=>handlePageChange(-1)} >
+        <Arrow active={page > 1}/>
       </Button>
-      <h1>paginacion {context.page} / {context.totalPages}</h1>
-      <Button  onClick={()=>habdlePage(next)}>
-        <Arrow active={context.page < context.totalPages}/>
+      <h1>paginacion {page} / {totalPages}</h1>
+      <Button  onClick={()=>handlePageChange(1)}>
+        <Arrow active={page < totalPages}/>
       </Button>
     </div>
   );
